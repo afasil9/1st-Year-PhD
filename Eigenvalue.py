@@ -7,7 +7,7 @@ from scipy import linalg
 from scipy.sparse.linalg import eigs
 
 
-n = 1 # Mesh Size
+n = 10 # Mesh Size
 domain = mesh.create_unit_square(MPI.COMM_WORLD, n, n)
 gdim = domain.geometry.dim
 fdim = domain.topology.dim - 1
@@ -32,10 +32,11 @@ A = fem.assemble_matrix(a,[bcs])
 # Zero rows of boundary DOFs of B. See [1]
 B = fem.assemble_matrix(b, [bcs])
 
+
+
 Asp = A.to_scipy()
 Bsp = B.to_scipy()
 
 
 w, v = eigs(Asp, k=6, M=Bsp)
-
 print(w)
