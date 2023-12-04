@@ -8,7 +8,10 @@ from scipy.sparse.linalg import eigs
 
 
 n = 10 # Mesh Size
-domain = mesh.create_unit_square(MPI.COMM_WORLD, n, n)
+comm = MPI.COMM_WORLD
+
+points = np.array([[0.0, 0.0], [np.pi, np.pi]], dtype=np.float64)
+domain = mesh.create_rectangle(MPI.COMM_WORLD, points, [n, n], mesh.CellType.triangle)
 gdim = domain.geometry.dim
 fdim = domain.topology.dim - 1
 
