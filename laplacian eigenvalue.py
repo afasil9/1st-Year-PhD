@@ -16,14 +16,14 @@ from scipy import linalg
 from scipy.sparse.linalg import eigs
 from dolfinx.fem.petsc import LinearProblem
 
-n = 10
+n = 2
 domain = mesh.create_unit_square(MPI.COMM_WORLD, n, n)
 x = SpatialCoordinate(domain)
 gdim = domain.geometry.dim
 fdim = domain.topology.dim - 1
 
 facets = mesh.locate_entities_boundary(domain, fdim, marker= lambda x:np.logical_or(np.isclose(x[0], 0.0),
-        np.isclose(x[0], 2.0)))
+        np.isclose(x[0], 1.0)))
 
 V = fem.FunctionSpace(domain, ("Lagrange",1))
 dofs = fem.locate_dofs_topological(V=V, entity_dim=1, entities=facets)
@@ -36,13 +36,16 @@ u = TrialFunction(V)
 v = TestFunction(V)
 a = form(inner(grad(u), grad(v)) * dx)  
 
+
+sp = fem.create_sparsity_pattern(a)
+
 # f = 6 #10 * ufl.exp(-((x[0] - 0.5) ** 2 + (x[1] - 0.5) ** 2) / 0.02)
 L = form(inner(u, v) * dx)
 
 A = assemble_matrix(a, bcs = [bc])
 A.assemble()
 
-B = assemble_matrix(L, bcs = [bc])
+B = assemble_matrix(L)
 B.assemble()
 
 def petsc2array(v):
@@ -53,6 +56,15 @@ np_a = petsc2array(A)
 np_b = petsc2array(B)
 
 #np_b = B.getArray() #Use this if B was a vector
+
+# Identiy 
+
+len = np_a.shape[0]
+I = np.identity(len)
+
+from scipy.linalg import eigvals
+
+eigvals(np_a)
 
 # %%
 # Eigenvalue stuff Attempt 1
